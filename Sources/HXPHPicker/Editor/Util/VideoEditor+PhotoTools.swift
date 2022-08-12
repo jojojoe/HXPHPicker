@@ -79,6 +79,9 @@ extension PhotoTools {
             if videoComposition.renderSize.width > 0 {
                 addVideoComposition = true
             }
+
+            //
+            
             let audioMix = try audioMix(
                 for: avAsset,
                 videoTrack: videoTrack,
@@ -88,6 +91,8 @@ extension PhotoTools {
                 audioVolume: audioVolume,
                 originalAudioVolume: originalAudioVolume
             )
+            
+            
             if let exportSession = AVAssetExportSession(
                 asset: mixComposition,
                 presetName: exportPreset.name
@@ -160,9 +165,13 @@ extension PhotoTools {
             of: videoTrack,
             at: .zero
         )
+        // speed scale
+        let destinationTimeRange = CMTimeMultiplyByFloat64(videoAsset.duration, multiplier:(1/Double(PhotoManager.shared.videoSpeedRate)))
+        compositionVideoTrack?.scaleTimeRange(videoTimeRange, toDuration: destinationTimeRange)
+        //
         return mixComposition
     }
-    
+     
     static func audioMix(
         for videoAsset: AVAsset,
         videoTrack: AVAssetTrack,
@@ -282,6 +291,13 @@ extension PhotoTools {
         ) {
             originalVoiceTrack.preferredTransform = audioTrack.preferredTransform
             try originalVoiceTrack.insertTimeRange(videoTimeRange, of: audioTrack, at: .zero)
+            // speed scale
+            let destinationTimeRange = CMTimeMultiplyByFloat64(videoTimeRange.duration, multiplier:(1/Double(PhotoManager.shared.videoSpeedRate)))
+            originalVoiceTrack.scaleTimeRange(videoTimeRange, toDuration: destinationTimeRange)
+            
+            //
+            
+            
             let volume: Float = originalAudioVolume
             let originalAudioInputParams = AVMutableAudioMixInputParameters(track: originalVoiceTrack)
             originalAudioInputParams.setVolumeRamp(
@@ -317,6 +333,7 @@ extension PhotoTools {
             composition: mixComposition,
             assetOrientation: videoAsset.videoOrientation
         )
+        
         let renderSize = videoComposition.renderSize
         cropVideoSize(videoComposition, cropSizeData)
         let overlaySize = videoComposition.renderSize
@@ -687,6 +704,7 @@ extension PhotoTools {
         composition: AVMutableComposition,
         assetOrientation: AVCaptureVideoOrientation
     ) -> AVMutableVideoComposition {
+        
         let videoComposition = AVMutableVideoComposition(propertiesOf: composition)
         guard assetOrientation != .landscapeRight else {
             return videoComposition
@@ -705,6 +723,9 @@ extension PhotoTools {
             // 顺时针旋转270°
             videoComposition.renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
         }
+        
+  
+        
         return videoComposition
     }
     

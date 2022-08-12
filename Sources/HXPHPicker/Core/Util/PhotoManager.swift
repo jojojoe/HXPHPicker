@@ -13,6 +13,10 @@ import PhotosUI
 public final class PhotoManager: NSObject {
     
     public static let shared = PhotoManager()
+    /// 视频的速率设置 rate 0.1 - 2 越来越快
+    public var videoSpeedRate: Float = 1
+    
+    ///
     
     /// 自定义语言
     public var customLanguages: [CustomLanguage] = []

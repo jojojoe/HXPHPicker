@@ -103,6 +103,9 @@ public extension EditorToolOptions {
         
         /// video - 时长裁剪
         case cropTime
+        
+        /// video - 播放速率
+        case speedRate
     }
 }
 
@@ -116,7 +119,9 @@ extension EditorToolView {
         static let filter = Options(rawValue: 1 << 4)
         static let music = Options(rawValue: 1 << 5)
         static let cropSize = Options(rawValue: 1 << 6)
-        static let cropTime = Options(rawValue: 1 << 6)
+        static let cropTime = Options(rawValue: 1 << 7)
+        static let speedRate = Options(rawValue: 1 << 8)
+        
         let rawValue: Int
         
         var isSticker: Bool {

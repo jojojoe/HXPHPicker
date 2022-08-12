@@ -14,6 +14,8 @@ extension VideoEditorViewController: EditorToolViewDelegate {
     /// 导出视频
     /// - Parameter toolView: 底部工具视频
     func toolView(didFinishButtonClick toolView: EditorToolView) {
+        hiddenSpeedRateView()
+        hiddenBrushColorView()
         videoView.deselectedSticker()
         let timeRang: CMTimeRange
         if let startTime = videoView.playerView.playStartTime,
@@ -50,7 +52,15 @@ extension VideoEditorViewController: EditorToolViewDelegate {
         }else {
             hasCropSize = false
         }
-        if hasAudio || timeRang != .zero || hasCropSize {
+        let hasSpeedRate: Bool
+        if videoView.playerView.player.rate == 1 {
+            hasSpeedRate = false
+        } else {
+            hasSpeedRate = true
+        }
+        
+        
+        if hasAudio || hasSpeedRate || timeRang != .zero || hasCropSize {
             exportLoadingView = ProgressHUD.showProgress(
                 addedTo: view,
                 text: "正在处理...".localized,
@@ -65,7 +75,7 @@ extension VideoEditorViewController: EditorToolViewDelegate {
         }
         delegate?.videoEditorViewController(didFinishWithUnedited: self)
         finishHandler?(self, nil)
-        backAction()
+//        backAction()
     }
     func exportVideoURL(
         timeRang: CMTimeRange,
@@ -106,7 +116,8 @@ extension VideoEditorViewController: EditorToolViewDelegate {
                     if videoURL != nil {
                         ProgressHUD.hide(forView: self?.view, animated: true)
                         self?.editFinishCallBack(urlConfig)
-                        self?.backAction()
+//                        self?.backAction()
+                        debugPrint("output video url - \(videoURL)")
                     }else {
                         self?.showErrorHUD()
                     }
@@ -199,15 +210,34 @@ extension VideoEditorViewController: EditorToolViewDelegate {
             toolTextClick()
         case .filter:
             toolFilterClick()
+        case .speedRate:
+            toolVideoSpeedRateClick()
         default:
             break
         }
     }
     
+    func toolVideoSpeedRateClick() {
+    
+        toolView.layoutSubviews()
+        hiddenBrushColorView()
+        isShowSpeedRate = !isShowSpeedRate
+        
+        if speedRateView.alpha == 0 {
+            showSpeedRateView()
+        } else if speedRateView.alpha == 1 {
+            hiddenSpeedRateView()
+        } else {
+            
+        }
+    }
+    
     func toolGraffitiClick() {
         videoView.drawEnabled = !videoView.drawEnabled
+        isShowSpeedRate = false
         toolView.stretchMask = videoView.drawEnabled
         toolView.layoutSubviews()
+        hiddenSpeedRateView()
         if videoView.drawEnabled {
             videoView.stickerEnabled = false
             showBrushColorView()
@@ -224,7 +254,9 @@ extension VideoEditorViewController: EditorToolViewDelegate {
         }
         toolView.deselected()
         videoView.drawEnabled = false
+        isShowSpeedRate = false
         hiddenBrushColorView()
+        hiddenSpeedRateView()
         if musicView.musics.isEmpty {
             if let loadHandler = config.music.handler {
                 let showLoading = loadHandler { [weak self] infos in
@@ -267,7 +299,9 @@ extension VideoEditorViewController: EditorToolViewDelegate {
     func toolCropSizeClick() {
         toolView.deselected()
         videoView.drawEnabled = false
+        isShowSpeedRate = false
         hiddenBrushColorView()
+        hiddenSpeedRateView()
         videoView.stickerEnabled = false
         videoView.startCropping(true)
         pState = .cropSize
@@ -297,7 +331,9 @@ extension VideoEditorViewController: EditorToolViewDelegate {
     func toolChartletClick() {
         toolView.deselected()
         videoView.drawEnabled = false
+        isShowSpeedRate = false
         hiddenBrushColorView()
+        hiddenSpeedRateView()
         chartletView.firstRequest()
         showChartlet = true
         hidenTopView()
@@ -307,7 +343,9 @@ extension VideoEditorViewController: EditorToolViewDelegate {
     func toolTextClick() {
         toolView.deselected()
         videoView.drawEnabled = false
+        isShowSpeedRate = false
         hiddenBrushColorView()
+        hiddenSpeedRateView()
         videoView.stickerEnabled = true
         if config.text.modalPresentationStyle == .fullScreen {
             isPresentText = true
@@ -323,7 +361,9 @@ extension VideoEditorViewController: EditorToolViewDelegate {
         toolView.deselected()
         videoView.drawEnabled = false
         videoView.stickerEnabled = false
+        isShowSpeedRate = false
         hiddenBrushColorView()
+        hiddenSpeedRateView()
         hidenTopView()
         showFilterView()
         videoView.canLookOriginal = true
@@ -349,6 +389,25 @@ extension VideoEditorViewController: EditorToolViewDelegate {
             if self.videoView.drawEnabled { return }
             self.brushColorView.isHidden = true
             self.brushBlockView.isHidden = true
+        }
+    }
+    
+    func showSpeedRateView() {
+        speedRateView.isHidden = false
+        UIView.animate(withDuration: 0.25) {
+            self.speedRateView.alpha = 1
+            
+        }
+    }
+    
+    func hiddenSpeedRateView() {
+        if speedRateView.alpha == 0 {
+            return
+        }
+        UIView.animate(withDuration: 0.25) {
+            self.speedRateView.alpha = 0
+        } completion: { (_) in
+            
         }
     }
     
@@ -379,6 +438,7 @@ extension VideoEditorViewController: EditorToolViewDelegate {
             toolView.deselected()
             videoView.drawEnabled = false
             hiddenBrushColorView()
+            hiddenSpeedRateView()
             cropConfirmView.showReset = false
             beforeStartTime = videoView.playerView.playStartTime
             beforeEndTime = videoView.playerView.playEndTime
@@ -413,6 +473,9 @@ extension VideoEditorViewController: EditorToolViewDelegate {
             }
         }
     }
+    
+    
+    
 }
 
 extension VideoEditorViewController: EditorStickerTextViewControllerDelegate {

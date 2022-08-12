@@ -110,7 +110,12 @@ class VideoEditorPlayerView: VideoPlayerView {
         play()
     }
     @objc func playerItemDidPlayToEndTimeNotification(notifi: Notification) {
-        resetPlay()
+        if let playerItem = notifi.object as? AVPlayerItem {
+            if player.currentItem == playerItem {
+                resetPlay()
+            }
+        }
+        
     }
     func seek(to time: CMTime, comletion: ((Bool) -> Void)? = nil) {
         player.seek(to: time, toleranceBefore: .zero, toleranceAfter: .zero) { (isFinished) in
@@ -138,6 +143,7 @@ class VideoEditorPlayerView: VideoPlayerView {
                 if isFinished {
                     self.play()
                     completion?(self.player.currentTime())
+                    self.player.rate = PhotoManager.shared.videoSpeedRate
                 }
             }
         }else {
@@ -145,9 +151,14 @@ class VideoEditorPlayerView: VideoPlayerView {
                 if isFinished {
                     self.play()
                     completion?(self.player.currentTime())
+                    self.player.rate = PhotoManager.shared.videoSpeedRate
                 }
             }
         }
+         
+
+        debugPrint("self.player.rate = \(self.player.rate)")
+        debugPrint("self.player = \(self.player)")
     }
     override func layoutSubviews() {
         super.layoutSubviews()

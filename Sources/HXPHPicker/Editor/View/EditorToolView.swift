@@ -198,7 +198,7 @@ extension EditorToolView: UICollectionViewDataSource, UICollectionViewDelegate, 
             return
         }
         let option = config.toolOptions[indexPath.item]
-        if option.type == .graffiti || option.type == .mosaic {
+        if option.type == .graffiti || option.type == .speedRate || option.type == .mosaic {
             if let selectedIndexPath = currentSelectedIndexPath,
                selectedIndexPath.item == indexPath.item {
                 deselected()

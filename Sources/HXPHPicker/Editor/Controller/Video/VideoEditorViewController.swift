@@ -10,6 +10,8 @@ import AVKit
 import Photos
 
 open class VideoEditorViewController: BaseViewController {
+     
+    
     public weak var delegate: VideoEditorViewControllerDelegate?
     
     /// 当前编辑的AVAsset
@@ -42,7 +44,8 @@ open class VideoEditorViewController: BaseViewController {
     
     /// 播放视频
     public func playVideo() { startPlayTimer() }
-    
+    /// 播放视频
+    public func pauseVideo() { pausePlay(at: .zero) }
     /// 视频原声音量
     public var videoVolume: Float = 1 {
         didSet { videoView.playerView.player.volume = videoVolume }
@@ -228,6 +231,7 @@ open class VideoEditorViewController: BaseViewController {
     var isMusicState = false
     var isSearchMusic = false
     var isShowVolume = false
+    var isShowSpeedRate = false
     lazy var brushBlockView: PhotoEditorBrushSizeView = {
         let view = PhotoEditorBrushSizeView.init(frame: .init(x: 0, y: 0, width: 30, height: 200))
         view.alpha = 0
@@ -318,6 +322,13 @@ open class VideoEditorViewController: BaseViewController {
         view.delegate = self
         return view
     }()
+    lazy var speedRateView: VideoEditorSpeedRateView = {
+        let view = VideoEditorSpeedRateView()
+        view.delegate = self
+        view.alpha = 0
+        view.isHidden = true
+        return view
+    }()
     public lazy var toolView: EditorToolView = {
         let toolView = EditorToolView.init(config: config.toolView)
         toolView.delegate = self
@@ -399,6 +410,8 @@ open class VideoEditorViewController: BaseViewController {
                 toolOptions.insert(.filter)
             case .music:
                 toolOptions.insert(.music)
+            case .speedRate:
+                toolOptions.insert(.speedRate)
             }
         }
     }
@@ -426,6 +439,9 @@ open class VideoEditorViewController: BaseViewController {
         }
         if toolOptions.contains(.filter) {
             view.addSubview(filterView)
+        }
+        if toolOptions.contains(.speedRate) {
+            view.addSubview(speedRateView)
         }
         if toolOptions.isSticker {
             view.addSubview(chartletView)
@@ -474,6 +490,7 @@ open class VideoEditorViewController: BaseViewController {
     }
     func backAction() {
         hiddenBrushColorView()
+        hiddenSpeedRateView()
         stopAllOperations()
         if let requestID = assetRequestID {
             PHImageManager.default().cancelImageRequest(requestID)
@@ -532,6 +549,7 @@ open class VideoEditorViewController: BaseViewController {
         )
         toolView.reloadContentInset()
         topView.width = view.width
+        topView.frame.origin.y = view.safeAreaInsets.top
         topView.height = navigationController?.navigationBar.height ?? 44
         if let modalPresentationStyle = navigationController?.modalPresentationStyle, UIDevice.isPortrait {
             if modalPresentationStyle == .fullScreen || modalPresentationStyle == .custom {
@@ -561,6 +579,9 @@ open class VideoEditorViewController: BaseViewController {
             brushColorView.frame = CGRect(x: 0, y: toolView.y - 65, width: view.width, height: 65)
             brushBlockView.x = view.width - 45 - UIDevice.rightMargin
             brushBlockView.centerY = view.height * 0.5
+        }
+        if toolOptions.contains(.speedRate) {
+            speedRateView.frame = CGRect(x: 0, y: toolView.y - 65, width: view.width, height: 65)
         }
         if toolOptions.isSticker {
             setChartletViewFrame()
@@ -703,6 +724,7 @@ extension VideoEditorViewController {
             isMusicState = false
             updateMusicView()
         }
+        
         if topView.isHidden == true {
             showTopView()
         }else {
@@ -712,6 +734,9 @@ extension VideoEditorViewController {
     func showTopView() {
         if videoView.drawEnabled {
             showBrushColorView()
+        }
+        if isShowSpeedRate {
+            showSpeedRateView()
         }
         toolView.isHidden = false
         topView.isHidden = false
@@ -724,6 +749,9 @@ extension VideoEditorViewController {
     func hidenTopView() {
         if videoView.drawEnabled {
             hiddenBrushColorView()
+        }
+        if isShowSpeedRate {
+            hiddenSpeedRateView()
         }
         UIView.animate(withDuration: 0.25) {
             self.toolView.alpha = 0

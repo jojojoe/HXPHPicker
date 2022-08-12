@@ -58,14 +58,18 @@ open class VideoEditorConfiguration: EditorConfiguration {
             imageName: "hx_editor_tools_graffiti",
             type: .graffiti
         )
-        let chartlet = EditorToolOptions(
+        let speedRate = EditorToolOptions(
             imageName: "hx_editor_photo_tools_emoji",
-            type: .chartlet
+            type: .speedRate
         )
-        let text = EditorToolOptions(
-            imageName: "hx_editor_photo_tools_text",
-            type: .text
-        )
+//        let chartlet = EditorToolOptions(
+//            imageName: "hx_editor_photo_tools_emoji",
+//            type: .chartlet
+//        )
+//        let text = EditorToolOptions(
+//            imageName: "hx_editor_photo_tools_text",
+//            type: .text
+//        )
         let cropSize = EditorToolOptions(
             imageName: "hx_editor_photo_crop",
             type: .cropSize
@@ -78,11 +82,11 @@ open class VideoEditorConfiguration: EditorConfiguration {
             imageName: "hx_editor_video_crop",
             type: .cropTime
         )
-        let filter = EditorToolOptions(
-            imageName: "hx_editor_tools_filter",
-            type: .filter
-        )
-        return .init(toolOptions: [graffiti, chartlet, text, music, cropSize, cropTime, filter])
+//        let filter = EditorToolOptions(
+//            imageName: "hx_editor_tools_filter",
+//            type: .filter
+//        )
+        return .init(toolOptions: [graffiti, music, cropSize, cropTime, speedRate])
     }()
 }
 
